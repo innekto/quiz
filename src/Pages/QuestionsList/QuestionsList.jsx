@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { QuestItem, QuestList } from './QuestionsList.styled';
 import { Link, useLocation } from 'react-router-dom';
 
-const regex = /[&<>"']/g;
+import QuestionControls from 'components/QuestionControls/QuestionControls';
+import { fetchQuestions } from 'Functions/FetchQuestions';
+
+import { QuestItem, QuestList } from './QuestionsList.styled';
 
 export const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isAnswerSelected, setIsAnswerSelected] = useState(false);
 
   const location = useLocation();
   const backLinkHref = location.state?.from ?? '/';
@@ -16,27 +18,9 @@ export const QuestionList = () => {
     const abortController = new AbortController();
     const signal = abortController.signal;
 
-    const fetchQuestions = async () => {
-      try {
-        const response = await axios.get('https://opentdb.com/api.php', {
-          params: {
-            amount: 46,
-            category: 20,
-            difficulty: '',
-            type: 'multiple',
-          },
-          signal: signal,
-        });
-        const filteredQuestions = response.data.results.filter(
-          question => !question.question.match(regex)
-        );
-        setQuestions(filteredQuestions);
-      } catch (error) {
-        return 'message';
-      }
-    };
-
-    fetchQuestions();
+    fetchQuestions(signal).then(filteredQuestions => {
+      setQuestions(filteredQuestions);
+    });
 
     return () => {
       abortController.abort();
@@ -49,17 +33,20 @@ export const QuestionList = () => {
 
   const handleNext = () => {
     setCurrentQuestionIndex(currentQuestionIndex + 1);
+    setIsAnswerSelected(false);
+  };
+
+  const handleAnswerSelect = () => {
+    setIsAnswerSelected(true);
   };
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  const filteredAnswers = currentQuestion?.incorrect_answers.filter(
-    answer => !answer.match(regex)
-  );
+  const incorrectAnswers = currentQuestion?.incorrect_answers;
+  // console.log('incorrectAnswers :>> ', incorrectAnswers);
 
-  if (currentQuestion && filteredAnswers.length === 3) {
-    filteredAnswers.push(currentQuestion.correct_answer);
-  }
+  const correctAnswer = currentQuestion?.correct_answer;
+  // console.log('correctAnswer', correctAnswer);
 
   return (
     <>
@@ -68,25 +55,30 @@ export const QuestionList = () => {
         {currentQuestion && (
           <QuestItem key={currentQuestion.question}>
             <p>{currentQuestion.question}</p>
+
             <ul>
-              {filteredAnswers.map((answer, index) => (
-                <li key={index}>{answer}</li>
-              ))}
+              {currentQuestion &&
+                incorrectAnswers &&
+                incorrectAnswers.map(answer => (
+                  <li key={answer}>
+                    <button onClick={handleAnswerSelect}>{answer}</button>
+                  </li>
+                ))}
+              <li>
+                <button onClick={handleAnswerSelect}>{correctAnswer}</button>
+              </li>
             </ul>
           </QuestItem>
         )}
       </QuestList>
-      <div>
-        <button onClick={handlePrevious} disabled={currentQuestionIndex === 0}>
-          Previous
-        </button>
-        <button
-          onClick={handleNext}
-          disabled={currentQuestionIndex === questions.length - 1}
-        >
-          Next
-        </button>
-      </div>
+      <QuestionControls
+        handlePrevious={handlePrevious}
+        handleNext={handleNext}
+        isPreviousDisabled={currentQuestionIndex === 0}
+        isNextDisabled={
+          !isAnswerSelected || currentQuestionIndex === questions.length - 1
+        }
+      />
     </>
   );
 };
