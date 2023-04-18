@@ -1,6 +1,6 @@
 import React from 'react';
 //кнопки перемикання питань
-const QuestionControls = ({
+export const QuestionControls = ({
   handlePrevious,
   handleNext,
   isPreviousDisabled,
@@ -17,5 +17,3 @@ const QuestionControls = ({
     </div>
   );
 };
-
-export default QuestionControls;
