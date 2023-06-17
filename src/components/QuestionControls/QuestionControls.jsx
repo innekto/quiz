@@ -1,19 +1,11 @@
 import React from 'react';
 //кнопки перемикання питань
-export const QuestionControls = ({
-  handlePrevious,
-  handleNext,
-  isPreviousDisabled,
-  isNextDisabled,
-}) => {
+export const QuestionControls = ({ handleNext, isNextDisabled }) => {
   return (
-    <div>
-      <button onClick={handlePrevious} disabled={isPreviousDisabled}>
-        Previous
-      </button>
+    <>
       <button onClick={handleNext} disabled={isNextDisabled}>
-        Next
+        Next Question
       </button>
-    </div>
+    </>
   );
 };

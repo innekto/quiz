@@ -8,9 +8,7 @@ import { Message } from 'components/Message/Message';
 import { AnswerList } from 'components/AnswerList/AnswerList';
 import { QuestionAnswerHandlers } from '../../Functions/QuestionAnswerHandlers';
 
-import { QuestItem, QuestList } from './QuestionsList.styled';
-
-export const QuestionList = () => {
+const QuestionList = () => {
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isAnswerSelected, setIsAnswerSelected] = useState(false);
@@ -34,29 +32,28 @@ export const QuestionList = () => {
     };
   }, []);
 
-  const { handlePrevious, handleNext, handleAnswerSelect } =
-    QuestionAnswerHandlers({
-      questions,
-      currentQuestionIndex,
-      setCurrentQuestionIndex,
-      setIsAnswerSelected,
-      setIsAnswered,
-      setNumCorrectAnswers,
-      setNumIncorrectAnswers,
-    });
+  const { handleNext, handleAnswerSelect } = QuestionAnswerHandlers({
+    questions,
+    currentQuestionIndex,
+    setCurrentQuestionIndex,
+    setIsAnswerSelected,
+    setIsAnswered,
+    setNumCorrectAnswers,
+    setNumIncorrectAnswers,
+  });
 
   const currentQuestion = questions[currentQuestionIndex];
 
   const incorrectAnswers = currentQuestion?.incorrect_answers;
-
+  console.log('incorrectAnswers', incorrectAnswers);
   const correctAnswer = currentQuestion?.correct_answer;
 
   return (
     <>
       <Link to={backLinkHref}>Back to Home</Link>
-      <QuestList>
+      <div>
         {currentQuestion && (
-          <QuestItem key={currentQuestion.question}>
+          <div key={currentQuestion.question}>
             <p>{currentQuestion.question}</p>
             <AnswerList
               currentQuestion={currentQuestion}
@@ -65,13 +62,11 @@ export const QuestionList = () => {
               handleAnswerSelect={handleAnswerSelect}
               isAnswered={isAnswered}
             />
-          </QuestItem>
+          </div>
         )}
-      </QuestList>
+      </div>
       <QuestionControls
-        handlePrevious={handlePrevious}
         handleNext={handleNext}
-        isPreviousDisabled={currentQuestionIndex === 0}
         isNextDisabled={!isAnswerSelected}
       />
       <Message />
@@ -80,3 +75,4 @@ export const QuestionList = () => {
     </>
   );
 };
+export default QuestionList;
